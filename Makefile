@@ -84,15 +84,7 @@ check-docker-login: check-binaries
 docker-login-if-possible: check-binaries
 	if [[ ! "${DOCKER_USERNAME}" == "" ]]; then echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin; fi
 
-prepare: check-build check install-qemu
-
-# Test are qemu based. SHOULD_DO: use `docker buildx bake`. See https://github.com/docker/buildx#buildx-bake-options-target
-install-qemu: check-binaries
-	# @ # From https://github.com/multiarch/qemu-user-static:
-	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
-uninstall-qemu: check-binaries
-	docker run --rm --privileged multiarch/qemu-user-static:register --reset
+prepare: check-build check
 
 check: check-binaries
 	@ if [[ "$(DOCKER_IMAGE_VERSION)" == "" ]]; then \
@@ -123,7 +115,7 @@ check: check-binaries
 	@ echo "DOCKER_IMAGE_TAGNAME: ${DOCKER_IMAGE_TAGNAME}"
 
 build-all-images: build-all-one-image-amd64     build-all-one-image-arm64v8     build-all-one-image-arm32v7     build-all-one-image-arm32v6 \
-                  build-all-one-image-amd64-5.5 build-all-one-image-arm64v8-5.5 build-all-one-image-arm32v7-5.5 uninstall-qemu
+                  build-all-one-image-amd64-5.5 build-all-one-image-arm64v8-5.5 build-all-one-image-arm32v7-5.5
 
 # Actually, the 'push' will only be done is DOCKER_USERNAME is set and not empty !
 build-all-one-image: prepare build-one-image test-one-image push-one-image
